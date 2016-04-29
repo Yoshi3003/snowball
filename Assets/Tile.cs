@@ -3,9 +3,11 @@ using System.Collections;
 
 public class Tile : MonoBehaviour {
 
+	private bool triggerSpawn;
+
 	// Use this for initialization
 	void Start () {
-
+		triggerSpawn = false;
 	}
 	
 	// Update is called once per frame
@@ -13,7 +15,7 @@ public class Tile : MonoBehaviour {
 
 	}
 
-	void OnCollisionExit(Collision collision) {
+	void OnCollisionEnter(Collision collision) {
 		if (collision.gameObject.tag == "Player") {
 			TileManager.Instance.SpawnTile ();
 		}
