@@ -13,12 +13,19 @@ namespace UnityStandardAssets.Vehicles.Ball
         private const float k_GroundRayLength = 1f; // The length of the ray to check if the ball is grounded.
         private Rigidbody m_Rigidbody;
 
+		private float life = 100f;
+		private bool hasJumped = false;
+		private bool isInAir = false;
+		private const float FALL_DAMAGE = 17f;
+
+		public GUIText lifeText;
 
         private void Start()
         {
             m_Rigidbody = GetComponent<Rigidbody>();
             // Set the maximum angular velocity.
             GetComponent<Rigidbody>().maxAngularVelocity = m_MaxAngularVelocity;
+			lifeText.text = "Life: " + (int)life;
         }
 
 
@@ -37,11 +44,43 @@ namespace UnityStandardAssets.Vehicles.Ball
             }
 
             // If on the ground and jump is pressed...
-            if (Physics.Raycast(transform.position, -Vector3.up, k_GroundRayLength) && jump)
+			if (isOnGround() && jump)
             {
                 // ... add force in upwards.
                 m_Rigidbody.AddForce(Vector3.up*m_JumpPower, ForceMode.Impulse);
+				hasJumped = true;
             }
+
+			if (!isOnGround () && hasJumped) {
+				isInAir = true;
+			}
         }
+
+		private void Update() {
+			if (isInAir && isOnGround()) {
+				Debug.Log ("Ball has landed, losing " + FALL_DAMAGE);
+				damage (FALL_DAMAGE);
+				isInAir = false;
+				hasJumped = false;
+			}
+
+			if (!isInAir) {
+				heal (0.08f);
+			}
+
+			lifeText.text = "Life: " + (int)life;
+		}
+
+		private bool isOnGround() {
+			return Physics.Raycast (transform.position, -Vector3.up, k_GroundRayLength);
+		}
+
+		private void heal(float amount) {
+			life = (life + amount >= 100f) ? 100f : life + amount;
+		}
+
+		private void damage(float amount) {
+			life = (life - amount <= 0f) ? 0f : life - amount;
+		}
     }
 }

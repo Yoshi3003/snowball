@@ -4,10 +4,11 @@ using System.Collections;
 public class Tile : MonoBehaviour {
 
 	private bool triggerSpawn;
+	private const int RECYCLE_DELAY = 2;
 
 	// Use this for initialization
 	void Start () {
-		triggerSpawn = false;
+		
 	}
 	
 	// Update is called once per frame
@@ -15,9 +16,29 @@ public class Tile : MonoBehaviour {
 
 	}
 
+	public void setTriggerSpawnTile(bool enable) {
+		triggerSpawn = enable;
+	}
+
 	void OnCollisionEnter(Collision collision) {
-		if (collision.gameObject.tag == "Player") {
-			TileManager.Instance.SpawnTile ();
+		if (collision.gameObject.tag == "Player" && triggerSpawn) {
+			TileManager.Instance.SpawnTiles (3);
+		}
+	}
+
+	void OnCollisionExit(Collision collision) {
+		StartCoroutine (Recycle ());
+	}
+
+	IEnumerator Recycle() {
+		yield return new WaitForSeconds (RECYCLE_DELAY);
+		switch (gameObject.name) {
+		case "FlatTile":
+			{
+				TileManager.Instance.FlatTilePool.Push (gameObject);
+				gameObject.SetActive (false);
+				break;
+			}
 		}
 	}
 }
